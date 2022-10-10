@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32519.379
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakerDll", "FakerDll.csproj", "{DE49CF4C-74D8-4479-A566-BE06FF56CAF7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestFaker", "..\TestFaker\TestFaker.csproj", "{4F0BDB3B-6E50-4CC7-8C3F-FA197C481A15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakerApp", "..\FakerApp\FakerApp.csproj", "{37972E70-3886-49CD-83A5-E6E889D3A923}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE49CF4C-74D8-4479-A566-BE06FF56CAF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE49CF4C-74D8-4479-A566-BE06FF56CAF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE49CF4C-74D8-4479-A566-BE06FF56CAF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE49CF4C-74D8-4479-A566-BE06FF56CAF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F0BDB3B-6E50-4CC7-8C3F-FA197C481A15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F0BDB3B-6E50-4CC7-8C3F-FA197C481A15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F0BDB3B-6E50-4CC7-8C3F-FA197C481A15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F0BDB3B-6E50-4CC7-8C3F-FA197C481A15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37972E70-3886-49CD-83A5-E6E889D3A923}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37972E70-3886-49CD-83A5-E6E889D3A923}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37972E70-3886-49CD-83A5-E6E889D3A923}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37972E70-3886-49CD-83A5-E6E889D3A923}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BC1AD6D8-F1B2-4EA5-9469-ADEC55F45339}
+	EndGlobalSection
+EndGlobal
