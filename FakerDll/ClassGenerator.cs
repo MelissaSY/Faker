@@ -5,14 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 
-
 namespace FakerDll
 {
-    public class StructGenerator : IValueGenerator
+    public class ClassGenerator : IValueGenerator
     {
         public bool CanGenerate(Type t)
         {
-            return t.IsValueType && !t.IsPrimitive && !t.IsEnum;
+            return t.IsClass && !t.IsGenericType;
         }
 
         public object? Generate(Type t, GeneratorContext context)
@@ -34,7 +33,7 @@ namespace FakerDll
                     maxParamI = i;
                 }
             }
-            if(maxParamNum > 0)
+            if (maxParamNum > 0)
             {
                 ParameterInfo[] maxParameters = parameters[maxParamI];
                 object?[] objParameters = new object[maxParameters.Length];
@@ -50,14 +49,14 @@ namespace FakerDll
             {
                 newObj = Activator.CreateInstance(t);
             }
-            foreach(FieldInfo field in fields)
+            foreach (FieldInfo field in fields)
             {
                 parameterType = field.FieldType;
                 field.SetValue(newObj, context.Faker.Create(parameterType));
             }
-            foreach(PropertyInfo property in properties)
+            foreach (PropertyInfo property in properties)
             {
-                if(property.CanWrite)
+                if (property.CanWrite)
                 {
                     parameterType = property.PropertyType;
                     property.SetValue(newObj, context.Faker.Create(parameterType));
