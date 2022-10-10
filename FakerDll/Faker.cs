@@ -5,14 +5,34 @@
         private GeneratorContext generatorContext;
         private List<IValueGenerator> generators;
         private Random random;
+        private int depth;
+        private List<Type> types; 
+        public FakerConfig? Config { get; }
         public Faker()
         {
+            types = new List<Type>();
+            depth = 0;
             random = new Random();
             generatorContext = new GeneratorContext(random, this);
             generators = new List<IValueGenerator>();
+            generators.Add(new ByteGenerator());
+            generators.Add(new SByteGenerator());
+            generators.Add(new ShortGenerator());
+            generators.Add(new UShortGenerator());
             generators.Add(new IntGenerator());
+            generators.Add(new UIntGenerator());
+            generators.Add(new StringGenerator());
             generators.Add(new StructGenerator());
+            generators.Add(new FloatGenerator());
+            generators.Add(new DoubleGenerator());
+            generators.Add(new LongGenerator());
+            generators.Add(new ULongGenerator());
             generators.Add(new ListGenerator());
+            generators.Add(new ClassGenerator());
+        }
+        public Faker(FakerConfig config):this()
+        {
+            this.Config = config;
         }
         public T? Create<T>()
         {
@@ -22,10 +42,22 @@
         {
             object? value = GetDefaultValue(T);
             int i;
-            for(i = 0; i < generators.Count && !generators[i].CanGenerate(T); i++) { }
-            if(i < generators.Count)
+            types.Add(T);
+            if (T != types[0])
             {
-                value = generators[i].Generate(T, generatorContext);
+                types.Remove(T);
+            }
+            if(types.Count <= 3)
+            {
+                for (i = 0; i < generators.Count && !generators[i].CanGenerate(T); i++) { }
+                if (i < generators.Count)
+                {
+                    value = generators[i].Generate(T, generatorContext);
+                }
+            }
+            if (T == types[0])
+            {
+                types.Remove(T);
             }
             return value;
 

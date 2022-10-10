@@ -6,19 +6,18 @@ using System.Threading.Tasks;
 
 namespace FakerDll
 {
-    public class IntGenerator : IValueGenerator
+    public class ULongGenerator : IValueGenerator
     {
         public bool CanGenerate(Type t)
         {
-            return t == typeof(int);
+            return t == typeof(long);
         }
 
-        public object Generate(Type t, GeneratorContext context)
+        public object? Generate(Type t, GeneratorContext context)
         {
-            byte[] data = new byte[4];
+            byte[] data = new byte[8];
             context.Random.NextBytes(data);
-            return BitConverter.ToInt32(data);
-           // return value;
+            return BitConverter.ToUInt64(data);
         }
     }
 }

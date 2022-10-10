@@ -23,8 +23,7 @@ namespace FakerDll
 
         public object? Generate(Type t, GeneratorContext context)
         {
-            Random random = new Random();
-            int num = random.Next(20);
+            int num = context.Random.Next(20);
             Type[] underTypes = t.GetGenericArguments();
             IList? newObj = (IList?)Activator.CreateInstance(t, num);
             
