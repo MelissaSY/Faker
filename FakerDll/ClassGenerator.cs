@@ -1,14 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace FakerDll
 {
     internal class MaxParametersComparerer : IComparer<ConstructorInfo>
     {
+        public int Compare(ConstructorInfo? x, ConstructorInfo? y)
+        {
+            int? result = -x?.GetParameters().Length + y?.GetParameters().Length;
+            return (int)(result == null ? 0 : result);
+        }
+    }
+    internal class SuitableConstructor : IComparer<ConstructorInfo>
+    {
+        private Dictionary<MemberInfo, IValueGenerator>? _constraits;
+        private Dictionary<PropertyInfo, IValueGenerator?> _properties;
+        private Dictionary<FieldInfo, IValueGenerator?> _fields;
+
+        public SuitableConstructor(Dictionary<MemberInfo, IValueGenerator>? constraits, Dictionary<PropertyInfo, IValueGenerator?> properties, Dictionary<FieldInfo, IValueGenerator?> fields)
+        {
+            _constraits = constraits;
+            _properties = properties;
+            _fields = fields;
+        }
         public int Compare(ConstructorInfo? x, ConstructorInfo? y)
         {
             int? result = -x?.GetParameters().Length + y?.GetParameters().Length;

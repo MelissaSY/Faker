@@ -52,9 +52,9 @@
             Types[T]--;
             return value;
         }
-        private IValueGenerator? FindGenerator(Type T)
+        private IValueGenerator FindGenerator(Type T)
         {
-            IValueGenerator? generator = null;
+            IValueGenerator generator;
             if(generatorContext.Generator != null)
             {
                 generator = generatorContext.Generator;
