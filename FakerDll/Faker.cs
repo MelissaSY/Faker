@@ -1,17 +1,17 @@
 ﻿namespace FakerDll
 {
-    public class Faker: IFaker
+    public class Faker : IFaker
     {
+        // public IValueGenerator? PriorityGenerator { get; set; }
         private GeneratorContext generatorContext;
         private List<IValueGenerator> generators;
+        private IValueGenerator generalGenerator;
         private Random random;
-        private int depth;
-        private List<Type> types; 
+        public Dictionary<Type, int> Types { get; private set; }
         public FakerConfig? Config { get; }
         public Faker()
         {
-            types = new List<Type>();
-            depth = 0;
+            Types = new Dictionary<Type, int>();
             random = new Random();
             generatorContext = new GeneratorContext(random, this);
             generators = new List<IValueGenerator>();
@@ -22,14 +22,16 @@
             generators.Add(new IntGenerator());
             generators.Add(new UIntGenerator());
             generators.Add(new StringGenerator());
-            generators.Add(new StructGenerator());
+            generators.Add(new DateTimeGenerator());
             generators.Add(new FloatGenerator());
             generators.Add(new DoubleGenerator());
             generators.Add(new LongGenerator());
             generators.Add(new ULongGenerator());
             generators.Add(new ListGenerator());
-            generators.Add(new ClassGenerator());
+            generalGenerator = new ClassGenerator();
+         //   generators.Add(new ClassGenerator());
         }
+
         public Faker(FakerConfig config):this()
         {
             this.Config = config;
@@ -41,26 +43,38 @@
         public object? Create(Type T)
         {
             object? value = GetDefaultValue(T);
-            int i;
-            types.Add(T);
-            if (T != types[0])
-            {
-                types.Remove(T);
+            int i = 0;
+            if (!Types.ContainsKey(T)) {
+                Types.Add(T, 0);
             }
-            if(types.Count <= 3)
+            Types[T]++;
+            value = FindGenerator(T)?.Generate(T, generatorContext);
+            Types[T]--;
+            return value;
+        }
+        private IValueGenerator? FindGenerator(Type T)
+        {
+            IValueGenerator? generator = null;
+            if(generatorContext.Generator != null)
             {
-                for (i = 0; i < generators.Count && !generators[i].CanGenerate(T); i++) { }
+                generator = generatorContext.Generator;
+                generatorContext.Generator = null;
+            }
+            else
+            {
+                int i = 0;
+                for (; i < generators.Count && !generators[i].CanGenerate(T); i++) { }
+
                 if (i < generators.Count)
                 {
-                    value = generators[i].Generate(T, generatorContext);
+                    generator = generators[i];
+                }
+                else
+                {
+                    generator = generalGenerator;
                 }
             }
-            if (T == types[0])
-            {
-                types.Remove(T);
-            }
-            return value;
-
+            return generator;
         }
         private static object? GetDefaultValue(Type t)
         {
