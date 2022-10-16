@@ -12,14 +12,14 @@ namespace FakerDll
     {
         public bool CanGenerate(Type t)
         {
-            return t.IsValueType && !t.IsPrimitive && !t.IsEnum;
+            return t.IsValueType && !t.IsPrimitive && !t.IsEnum && !(t == typeof(decimal));
         }
 
         public object? Generate(Type t, GeneratorContext context)
         {
             object? newObj;
             Type parameterType;
-            ConstructorInfo[] constructors = t.GetConstructors();
+            ConstructorInfo[] constructors = t.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             ParameterInfo[][] parameters = new ParameterInfo[constructors.Length][];
             FieldInfo[] fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance);
             PropertyInfo[] properties = t.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -44,7 +44,15 @@ namespace FakerDll
                     objParameters[i] = context.Faker.Create(parameterType);
 
                 }
-                newObj = Activator.CreateInstance(t, objParameters);
+                try
+                {
+                    newObj = Activator.CreateInstance(t, objParameters);
+                }
+                catch
+                {
+                    newObj = Activator.CreateInstance(t);
+                }
+
             }
             else
             {

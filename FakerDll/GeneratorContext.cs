@@ -9,9 +9,9 @@ namespace FakerDll
     public class GeneratorContext
     {
         public Random Random { get; }
-        public IFaker Faker { get; }
-
-        public GeneratorContext(Random random, IFaker faker)
+        public Faker Faker { get; }
+        public IValueGenerator? Generator { get; set; }
+        public GeneratorContext(Random random, Faker faker)
         {
             Random = random;
             Faker = faker;

@@ -10,7 +10,7 @@ namespace FakerDll
 {
     public class FakerConfig : IFakerConfig
     {
-        Dictionary<Type, Dictionary<MemberInfo, IValueGenerator>> generatorsConstraits;
+        public Dictionary<Type, Dictionary<MemberInfo, IValueGenerator>> generatorsConstraits { get; private set; }
         public FakerConfig()
         {
             generatorsConstraits = new Dictionary<Type, Dictionary<MemberInfo, IValueGenerator>>();
@@ -23,7 +23,7 @@ namespace FakerDll
             if (operation != null)
             {
                 Generator generator = new Generator();
-                MemberInfo member = operation.Member;
+                MemberInfo member = operation.Member;   
                 if (generator.CanGenerate(lambda.ReturnType))
                 {
                     if (!generatorsConstraits.ContainsKey(type))
@@ -33,6 +33,10 @@ namespace FakerDll
                     generatorsConstraits[type].Add(member, generator);
                 }
             }
+        }
+        public void Add(Type classType, Type memberType, IValueGenerator generator, Expression<Func<Type, MemberInfo>> lambda)
+        {
+
         }
     }
 }
