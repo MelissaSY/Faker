@@ -56,6 +56,7 @@ namespace FakerApp
 
             Faker faker = new Faker(config);
             faker.Create<DateTime>();
+            Faker faker_1 = faker.Create<Faker>();
            // faker.AddGenerator(new DecimalGenerator());
 //            faker.AddGenerator((IValueGenerator)charGeneratorAssembly.CreateInstance("CharGeneratorDll.CharGenerator"));
 
