@@ -17,19 +17,6 @@ namespace FakerDll
     }
     public class ClassGenerator : IValueGenerator
     {
-        //_constraits may be redused after calling SetGenerators method
-        private Dictionary<MemberInfo, IValueGenerator>? _constraits;
-        //_fields and _properties will be initialized after method SetGenerators(Type) 
-        private Dictionary<PropertyInfo, IValueGenerator?> _properties;
-        private Dictionary<FieldInfo, IValueGenerator?> _fields;
-        //_parameters will be initialized after calling method SelectConstructor
-        private Dictionary<ParameterInfo, IValueGenerator?> _parameters;  
-        public ClassGenerator()
-        {
-            _properties = new Dictionary<PropertyInfo, IValueGenerator?>();
-            _fields = new Dictionary<FieldInfo, IValueGenerator?>();
-            _parameters = new Dictionary<ParameterInfo, IValueGenerator?>();
-        }
         public bool CanGenerate(Type t)
         {
             return true;
@@ -37,9 +24,17 @@ namespace FakerDll
 
         public object? Generate(Type t, GeneratorContext context)
         {
-            _properties.Clear();
-            _fields.Clear();
-            _parameters.Clear();
+            //_constraits may be redused after calling SetGenerators method
+            Dictionary<MemberInfo, IValueGenerator>? constraits = null;
+            //_fields and _properties will be initialized after method SetGenerators(Type) 
+            Dictionary<PropertyInfo, IValueGenerator?> properties;
+            Dictionary<FieldInfo, IValueGenerator?> fields;
+            //_parameters will be initialized after calling method SelectConstructor
+            Dictionary<ParameterInfo, IValueGenerator?> parameters;
+
+            properties = new Dictionary<PropertyInfo, IValueGenerator?>();
+            fields = new Dictionary<FieldInfo, IValueGenerator?>();
+            parameters = new Dictionary<ParameterInfo, IValueGenerator?>();
             if (context.Faker.Types[t] > 3)
             {
                 return null;
@@ -49,23 +44,23 @@ namespace FakerDll
             ConstructorInfo? constructor;
             List<ConstructorInfo> constructors = t.GetConstructors(BindingFlags.Public | BindingFlags.Instance).ToList();
             constructors.Sort(new MaxParametersComparerer());
-            context.Faker.Config?.generatorsConstraits.TryGetValue(t, out _constraits);
+            context.Faker.Config?.generatorsConstraits.TryGetValue(t, out constraits);
 
-            SetGenerators(t);
+            SetGenerators(t, ref fields, ref properties, ref constraits);
 
             while (constructors.Count > 0 && newObj == null)
             {
-                constructor = SelectConstructor(constructors);
+                constructor = SelectConstructor(constructors, ref parameters, ref constraits);
 
-                if (_parameters.Count > 0)
+                if (parameters.Count > 0)
                 {
-                    object?[] objParameters = new object[_parameters.Count];
+                    object?[] objParameters = new object[parameters.Count];
                     int param = -1;
-                    foreach(ParameterInfo parameter in _parameters.Keys)
+                    foreach(ParameterInfo parameter in parameters.Keys)
                     {
                         param++;
                         parameterType = parameter.ParameterType;
-                        context.Generator = _parameters[parameter];
+                        context.Generator = parameters[parameter];
                         objParameters[param] = context.Faker.Create(parameterType);
                     }
                     try
@@ -99,16 +94,16 @@ namespace FakerDll
 
             if(newObj != null)
             {
-                foreach (FieldInfo field in _fields.Keys)
+                foreach (FieldInfo field in fields.Keys)
                 {
                     parameterType = field.FieldType;
-                    context.Generator = _fields[field];
+                    context.Generator = fields[field];
                     field.SetValue(newObj, context.Faker.Create(parameterType));
                 }
-                foreach (PropertyInfo property in _properties.Keys)
+                foreach (PropertyInfo property in properties.Keys)
                 {
                     parameterType = property.PropertyType;
-                    context.Generator = _properties[property];
+                    context.Generator = properties[property];
                     property.SetValue(newObj, context.Faker.Create(parameterType));
                 }
             }
@@ -119,7 +114,7 @@ namespace FakerDll
         /// calls method FindGenerator which removes generators from _constraits
         /// </summary>
         /// <param name="t"></param>
-        private void SetGenerators(Type t)
+        private void SetGenerators(Type t, ref Dictionary<FieldInfo, IValueGenerator?> _fields, ref Dictionary<PropertyInfo, IValueGenerator?> _properties, ref Dictionary<MemberInfo, IValueGenerator>? _constraits)
         {
             FieldInfo[] fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance);
             PropertyInfo[] properties = t.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -127,20 +122,20 @@ namespace FakerDll
             IValueGenerator? generator;
             foreach(FieldInfo field in fields)
             {
-                generator = FindGenerator(field);
+                generator = FindGenerator(field, ref _constraits);
                 _fields.Add(field, null);
             }
             foreach(PropertyInfo property in properties)
             {
                 if (property.CanWrite)
                 {
-                    generator = FindGenerator(property);
+                    generator = FindGenerator(property, ref _constraits);
                     _properties.Add(property, generator);
                 }
             }
-            if(this._constraits?.Count < 1)
+            if(_constraits?.Count < 1)
             {
-                this._constraits = null;
+                _constraits = null;
             }
         }
         /// <summary>
@@ -148,7 +143,7 @@ namespace FakerDll
         /// </summary>
         /// <param name="member"></param>
         /// <returns></returns>
-        private IValueGenerator? FindGenerator(MemberInfo member)
+        private IValueGenerator? FindGenerator(MemberInfo member, ref Dictionary<MemberInfo, IValueGenerator>? _constraits)
         {
             IValueGenerator? generator = null;
             _constraits?.TryGetValue(member, out generator);
@@ -164,7 +159,7 @@ namespace FakerDll
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        private (Dictionary<ParameterInfo, IValueGenerator?>, int unsatisfied) SetGenerators(List<ParameterInfo> parameters)
+        private (Dictionary<ParameterInfo, IValueGenerator?>, int unsatisfied) SetGenerators(List<ParameterInfo> parameters, ref Dictionary<MemberInfo, IValueGenerator>? _constraits)
         {
             Dictionary<ParameterInfo, IValueGenerator?> parametersGenerators = new Dictionary<ParameterInfo, IValueGenerator?>();
             if (_constraits == null)
@@ -200,7 +195,7 @@ namespace FakerDll
             return (parametersGenerators, unsatisfied);
 
         }
-        private ConstructorInfo? SelectConstructor(List<ConstructorInfo> constructors)
+        private ConstructorInfo? SelectConstructor(List<ConstructorInfo> constructors, ref Dictionary<ParameterInfo, IValueGenerator?> _parameters, ref Dictionary<MemberInfo, IValueGenerator>? _constraits)
         {
             ConstructorInfo? constructor;
             List<ParameterInfo> parameters; 
@@ -211,17 +206,17 @@ namespace FakerDll
                 return null;
             }
             constructor = constructors[0];
-            (_parameters, unsatisfied) = SetGenerators(constructor.GetParameters().ToList());
-            if (this._constraits != null)
+            (_parameters, unsatisfied) = SetGenerators(constructor.GetParameters().ToList(), ref _constraits);
+            if (_constraits != null)
             {
                 _parameters.Clear();
                 constructor = null;
-                int miss = this._constraits.Count;
+                int miss = _constraits.Count;
                 for (int i = 0; i < constructors.Count && miss > 0; i++)
                 {
-                    unsatisfied = this._constraits.Count;
+                    unsatisfied = _constraits.Count;
                     parameters = constructors[i].GetParameters().ToList();
-                    (constructorParamters, unsatisfied) = SetGenerators(parameters);
+                    (constructorParamters, unsatisfied) = SetGenerators(parameters, ref _constraits);
 
                     if (miss > unsatisfied)
                     {

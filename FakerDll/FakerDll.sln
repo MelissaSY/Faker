@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DecimalGeneratorDll", "..\D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharGeneratorDll", "..\CharGeneratorDll\CharGeneratorDll.csproj", "{F6E51462-80B7-417B-B76A-6DAFFA77A384}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneratorsLoaderDll", "..\GeneratorsLoaderDll\GeneratorsLoaderDll.csproj", "{D77B250C-0FD3-48A7-8D5C-F645F90867C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{F6E51462-80B7-417B-B76A-6DAFFA77A384}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6E51462-80B7-417B-B76A-6DAFFA77A384}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6E51462-80B7-417B-B76A-6DAFFA77A384}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D77B250C-0FD3-48A7-8D5C-F645F90867C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D77B250C-0FD3-48A7-8D5C-F645F90867C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D77B250C-0FD3-48A7-8D5C-F645F90867C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D77B250C-0FD3-48A7-8D5C-F645F90867C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
