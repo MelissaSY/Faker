@@ -14,8 +14,8 @@ namespace DecimalGeneratorDll
             decimal? value_1 = Convert.ToDecimal(context.Random.NextDouble());
             decimal? value_2 = value_1;
             value_1 *= decimal.MaxValue;
-            value_2 *= decimal.MinValue;
             value_1 += decimal.MinValue;
+            value_2 *= decimal.MinValue;
             value_1 -= value_2;
             return value_1;
         }

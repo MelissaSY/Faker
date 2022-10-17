@@ -15,7 +15,9 @@ namespace FakerDll
 
         public object? Generate(Type t, GeneratorContext context)
         {
-            return context.Random.NextSingle() * (float.MaxValue - float.MinValue) + float.MinValue;
+            byte[] data = new byte[4];
+            context.Random.NextBytes(data);
+            return BitConverter.ToSingle(data);
         }
     }
 }

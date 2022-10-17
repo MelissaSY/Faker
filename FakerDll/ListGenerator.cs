@@ -25,13 +25,17 @@ namespace FakerDll
         {
             int num = context.Random.Next(1, 20);
             Type[] underTypes = t.GetGenericArguments();
-            IList? newObj = (IList?)Activator.CreateInstance(t, num);
-            
-            if(newObj != null)
+            IList? newObj = (IList?)Activator.CreateInstance(t);
+
+            if (newObj != null)
             {
                 for (int i = 0; i < num; i++)
                 {
-                    newObj.Add(context.Faker.Create(underTypes[0]));
+                    object? obj = context.Faker.Create(underTypes[0]);
+                    if(obj != null)
+                    {
+                        newObj.Add(obj);
+                    }
                 }
             }
             return newObj;

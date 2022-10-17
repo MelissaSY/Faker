@@ -13,20 +13,26 @@ namespace FakerApp
         }
         public person(int age)
         {
-            this.Age = age; 
+            this.Age = age;
             this.Surname = "";
             this.Name = "";
         }
-        public string? Name { get; }
+        public person()
+        {
+            this.Age = 0;
+            this.Surname = "";
+            this.Name = "";
+        }
+        public string Name { get; }
         public int Age { get; }
-        public string Surname { get; set; }
+        public string Surname { get; private set; }
     }
     public class A
     {
         public List<A> _as;
         public B? b;
         private string? _name;
-        public int _age;
+        public int Age;
     }
     public class B
     {
@@ -40,33 +46,54 @@ namespace FakerApp
     {
         public B? b;
     }
-
+    public class Foo
+    {
+        public bool boo;
+        public byte b;
+        public double d;
+        public float f;
+        public int i;
+        public string s;
+        public List<List<person>> people;
+        public short sh;
+        public sbyte sb;   
+        public uint u;
+        public ulong ul;
+        public ushort us;
+        public long l;
+        private A? _a;
+        private char _c;
+        public Foo(A a, List<List<person>> people, char c)
+        {
+            _a = a;
+            _c = c;
+            this.people = people;
+            s = "";
+        }
+    }
     internal class Program
     {
         static void Main(string[] args)
         {
-            // Assembly charGeneratorAssembly = Assembly.LoadFile(@"D:\5 сем\СПП\СПП\ЛР\лр2\CharGeneratorDll\bin\Debug\net6.0\CharGeneratorDll.dll");
-            //Assembly assembly = Assembly.Load("CharGeneratorDll");
-            // IValueGenerator ageGenearator = ageGeneratorAssembly.CreateInstance("AgeGeneratorDll.AgeGenerator");
-
             FakerConfig config = new FakerConfig();
             config.Add<person, int, AgeGenerator>(p => p.Age);
-            config.Add<person, string, StringGenerator>(p => p.Name);
+            config.Add<person, string, NameGenerator>(p => p.Name);
             config.Add<person, string, StringGenerator>(p => p.Surname);
 
+            config.Add<A, int, AgeGenerator>(a => a.Age);
+
             Faker faker = new Faker(config);
-            faker.Create<DateTime>();
-            Faker faker_1 = faker.Create<Faker>();
-           // faker.AddGenerator(new DecimalGenerator());
-//            faker.AddGenerator((IValueGenerator)charGeneratorAssembly.CreateInstance("CharGeneratorDll.CharGenerator"));
-
-            /*char c = faker.Create<char>();
-            decimal? dec = faker.Create<decimal>();*/
-
             person Person = faker.Create<person>();
-           // D? a = faker.Create<D>();
-            int i = faker.Create<int>();
+            Foo foo = faker.Create<Foo>();
+            char c = faker.Create<char>();
+            DateTime dt =   faker.Create<DateTime>();
+            Faker? fc = faker.Create<Faker>();
+            
+            decimal? dec = faker.Create<decimal>();
+            double doub = faker.Create<double>();
+            bool b = faker.Create<bool>();
             List<List<person>> people = faker.Create<List<List<person>>>();
+
             Console.ReadLine();
         }
     }

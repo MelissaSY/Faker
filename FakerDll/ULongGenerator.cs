@@ -10,7 +10,7 @@ namespace FakerDll
     {
         public bool CanGenerate(Type t)
         {
-            return t == typeof(long);
+            return t == typeof(ulong);
         }
 
         public object? Generate(Type t, GeneratorContext context)

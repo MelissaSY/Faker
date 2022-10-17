@@ -7,14 +7,15 @@
         private List<IValueGenerator> generators;
         private IValueGenerator generalGenerator;
         private Random random;
-        public Dictionary<Type, int> Types { get; private set; }
         public FakerConfig? Config { get; }
         public Faker()
         {
-            Types = new Dictionary<Type, int>();
             random = new Random();
             generatorContext = new GeneratorContext(random, this);
+            
+            GeneratorsLoader loader = new GeneratorsLoader();
             generators = new List<IValueGenerator>();
+            generators.Add(new BoolGenerator());
             generators.Add(new ByteGenerator());
             generators.Add(new SByteGenerator());
             generators.Add(new ShortGenerator());
@@ -28,8 +29,8 @@
             generators.Add(new LongGenerator());
             generators.Add(new ULongGenerator());
             generators.Add(new ListGenerator());
+            generators.AddRange(loader.LoadGenerators());
             generalGenerator = new ClassGenerator();
-         //   generators.Add(new ClassGenerator());
         }
 
         public Faker(FakerConfig config):this()
@@ -42,15 +43,7 @@
         }
         public object? Create(Type T)
         {
-            object? value = GetDefaultValue(T);
-            int i = 0;
-            if (!Types.ContainsKey(T)) {
-                Types.Add(T, 0);
-            }
-            Types[T]++;
-            value = FindGenerator(T)?.Generate(T, generatorContext);
-            Types[T]--;
-            return value;
+            return FindGenerator(T).Generate(T, generatorContext);
         }
         private IValueGenerator FindGenerator(Type T)
         {
@@ -75,13 +68,6 @@
                 }
             }
             return generator;
-        }
-        private static object? GetDefaultValue(Type t)
-        {
-            if (t.IsValueType)
-                return Activator.CreateInstance(t);
-            else
-                return null;
         }
         public void AddGenerator(IValueGenerator generator)
         {

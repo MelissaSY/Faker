@@ -18,7 +18,6 @@ namespace FakerDll
             byte[] data = new byte[4];
             context.Random.NextBytes(data);
             return BitConverter.ToInt32(data);
-           // return value;
         }
     }
 }

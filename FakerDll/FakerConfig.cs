@@ -34,9 +34,5 @@ namespace FakerDll
                 }
             }
         }
-        public void Add(Type classType, Type memberType, IValueGenerator generator, Expression<Func<Type, MemberInfo>> lambda)
-        {
-
-        }
     }
 }
