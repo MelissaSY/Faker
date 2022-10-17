@@ -15,7 +15,7 @@ namespace FakerDll
 
         public object? Generate(Type t, GeneratorContext context)
         {
-            return context.Random.Next(sbyte.MinValue, sbyte.MaxValue + 1);
+            return (sbyte)context.Random.Next(sbyte.MinValue, sbyte.MaxValue + 1);
         }
     }
 }

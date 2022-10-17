@@ -5,15 +5,11 @@ VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakerDll", "FakerDll.csproj", "{DE49CF4C-74D8-4479-A566-BE06FF56CAF7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestFaker", "..\TestFaker\TestFaker.csproj", "{4F0BDB3B-6E50-4CC7-8C3F-FA197C481A15}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakerApp", "..\FakerApp\FakerApp.csproj", "{37972E70-3886-49CD-83A5-E6E889D3A923}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DecimalGeneratorDll", "..\DecimalGeneratorDll\DecimalGeneratorDll.csproj", "{641102E2-6264-47C2-8AED-E9D81FA687E7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharGeneratorDll", "..\CharGeneratorDll\CharGeneratorDll.csproj", "{F6E51462-80B7-417B-B76A-6DAFFA77A384}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneratorsLoaderDll", "..\GeneratorsLoaderDll\GeneratorsLoaderDll.csproj", "{D77B250C-0FD3-48A7-8D5C-F645F90867C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +21,6 @@ Global
 		{DE49CF4C-74D8-4479-A566-BE06FF56CAF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE49CF4C-74D8-4479-A566-BE06FF56CAF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE49CF4C-74D8-4479-A566-BE06FF56CAF7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4F0BDB3B-6E50-4CC7-8C3F-FA197C481A15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4F0BDB3B-6E50-4CC7-8C3F-FA197C481A15}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4F0BDB3B-6E50-4CC7-8C3F-FA197C481A15}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4F0BDB3B-6E50-4CC7-8C3F-FA197C481A15}.Release|Any CPU.Build.0 = Release|Any CPU
 		{37972E70-3886-49CD-83A5-E6E889D3A923}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{37972E70-3886-49CD-83A5-E6E889D3A923}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37972E70-3886-49CD-83A5-E6E889D3A923}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -41,10 +33,6 @@ Global
 		{F6E51462-80B7-417B-B76A-6DAFFA77A384}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6E51462-80B7-417B-B76A-6DAFFA77A384}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6E51462-80B7-417B-B76A-6DAFFA77A384}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D77B250C-0FD3-48A7-8D5C-F645F90867C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D77B250C-0FD3-48A7-8D5C-F645F90867C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D77B250C-0FD3-48A7-8D5C-F645F90867C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D77B250C-0FD3-48A7-8D5C-F645F90867C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

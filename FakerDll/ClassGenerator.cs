@@ -2,123 +2,152 @@
 
 namespace FakerDll
 {
-    internal class MaxParametersComparerer : IComparer<ConstructorInfo>
+    internal class MaxSatisfied : IComparer<ConstructorInfo>
     {
-        public int Compare(ConstructorInfo? x, ConstructorInfo? y)
+        Dictionary<ConstructorInfo, int> constructors;
+        public MaxSatisfied(Dictionary<ConstructorInfo, int> constructors)
         {
-            int? result = -x?.GetParameters().Length + y?.GetParameters().Length;
-            return (int)(result == null ? 0 : result);
-        }
-    }
-    internal class SuitableConstructor : IComparer<ConstructorInfo>
-    {
-        private Dictionary<MemberInfo, IValueGenerator>? _constraits;
-        private Dictionary<PropertyInfo, IValueGenerator?> _properties;
-        private Dictionary<FieldInfo, IValueGenerator?> _fields;
-
-        public SuitableConstructor(Dictionary<MemberInfo, IValueGenerator>? constraits, Dictionary<PropertyInfo, IValueGenerator?> properties, Dictionary<FieldInfo, IValueGenerator?> fields)
-        {
-            _constraits = constraits;
-            _properties = properties;
-            _fields = fields;
+            this.constructors = constructors;
         }
         public int Compare(ConstructorInfo? x, ConstructorInfo? y)
         {
-            int? result = -x?.GetParameters().Length + y?.GetParameters().Length;
-            return (int)(result == null ? 0 : result);
+            if (x == null || y == null)
+            {
+                return 0;
+            }
+            if(!constructors.ContainsKey(x) || !constructors.ContainsKey(y))
+            {
+                return 0;
+            }
+            int compareResult = constructors[x].CompareTo(constructors[y]);
+            return compareResult == 0 ? (-x.GetParameters().Length + y.GetParameters().Length) : compareResult;
         }
     }
     public class ClassGenerator : IValueGenerator
     {
+        private Dictionary<Type, int> Types { get; set; }
         public bool CanGenerate(Type t)
         {
             return true;
         }
-
+        public ClassGenerator()
+        {
+            Types = new Dictionary<Type, int>();
+        }
         public object? Generate(Type t, GeneratorContext context)
         {
-            //_constraits may be redused after calling SetGenerators method
-            Dictionary<MemberInfo, IValueGenerator>? constraits = null;
-            //_fields and _properties will be initialized after method SetGenerators(Type) 
-            Dictionary<PropertyInfo, IValueGenerator?> properties;
-            Dictionary<FieldInfo, IValueGenerator?> fields;
-            //_parameters will be initialized after calling method SelectConstructor
-            Dictionary<ParameterInfo, IValueGenerator?> parameters;
-
-            properties = new Dictionary<PropertyInfo, IValueGenerator?>();
-            fields = new Dictionary<FieldInfo, IValueGenerator?>();
-            parameters = new Dictionary<ParameterInfo, IValueGenerator?>();
-            if (context.Faker.Types[t] > 3)
+            if (!Types.ContainsKey(t))
             {
-                return null;
+                Types.Add(t, 0);
             }
-            object? newObj = null;
-            Type parameterType;
-            ConstructorInfo? constructor;
-            List<ConstructorInfo> constructors = t.GetConstructors(BindingFlags.Public | BindingFlags.Instance).ToList();
-            constructors.Sort(new MaxParametersComparerer());
-            context.Faker.Config?.generatorsConstraits.TryGetValue(t, out constraits);
-
-            SetGenerators(t, ref fields, ref properties, ref constraits);
-
-            while (constructors.Count > 0 && newObj == null)
+            if (this.Types[t] > 3)
             {
-                constructor = SelectConstructor(constructors, ref parameters, ref constraits);
-
-                if (parameters.Count > 0)
+                return GetDefaultValue(t);
+            }
+            Types[t]++;
+            Dictionary<MemberInfo, IValueGenerator>? constraits = null;
+            Dictionary<PropertyInfo, IValueGenerator?> properties = new Dictionary<PropertyInfo, IValueGenerator?>();
+            Dictionary<FieldInfo, IValueGenerator?> fields = new Dictionary<FieldInfo, IValueGenerator?>();
+            context.Faker.Config?.generatorsConstraits.TryGetValue(t, out constraits);
+            constraits = CopyConstraits(constraits);
+            SetGenerators(t, ref fields, ref properties, ref constraits);
+            object? newObj = TryActivate(t, context, constraits);
+            InitializeFieldsProoperties(newObj, fields, properties, context);
+            this.Types[t]--;
+            return newObj;
+        }
+        private Dictionary<MemberInfo, IValueGenerator>? CopyConstraits(Dictionary<MemberInfo, IValueGenerator>? constraits)
+        {
+            if (constraits == null)
+                return null;
+            Dictionary<MemberInfo, IValueGenerator>? newConstraits = new Dictionary<MemberInfo, IValueGenerator>();
+            foreach(MemberInfo member in constraits.Keys)
+            {
+                newConstraits.Add(member, constraits[member]);
+            }
+            return newConstraits;
+        }
+        private void InitializeFieldsProoperties(object? newObj, 
+            Dictionary<FieldInfo, IValueGenerator?> fields, Dictionary<PropertyInfo, IValueGenerator?> properties, 
+            GeneratorContext context)
+        {
+            if (newObj != null)
+            {
+                foreach (FieldInfo field in fields.Keys)
                 {
-                    object?[] objParameters = new object[parameters.Count];
-                    int param = -1;
-                    foreach(ParameterInfo parameter in parameters.Keys)
-                    {
-                        param++;
-                        parameterType = parameter.ParameterType;
-                        context.Generator = parameters[parameter];
-                        objParameters[param] = context.Faker.Create(parameterType);
-                    }
                     try
                     {
-                        newObj = Activator.CreateInstance(t, objParameters);
+                        context.Generator = fields[field];
+                        field.SetValue(newObj, context.Faker.Create(field.FieldType));
                     }
-                    catch
+                    catch { }
+                }
+                foreach (PropertyInfo property in properties.Keys)
+                {
+                    try
                     {
-                        if(constructor != null)
+                        if (property.SetMethod.IsPublic)
                         {
-                            constructors.Remove(constructor);
+                            context.Generator = properties[property];
+                            property.SetValue(newObj, context.Faker.Create(property.PropertyType));
                         }
                     }
-                    finally { }
+                    catch { }
                 }
-                else
+            }
+        }
+        private object? TryActivate(Type t, GeneratorContext context, Dictionary<MemberInfo, IValueGenerator>? constraits)
+        {
+            object? newObj = null;
+            ConstructorInfo? constructor;
+            List<ConstructorInfo> constructors = t.GetConstructors(BindingFlags.Public | BindingFlags.Instance).ToList();
+            Dictionary<ConstructorInfo, int> constructorUnsatisfied = new Dictionary<ConstructorInfo, int>();
+            Dictionary<ConstructorInfo, Dictionary<ParameterInfo, IValueGenerator?>> constructorParameters =
+                new Dictionary<ConstructorInfo, Dictionary<ParameterInfo, IValueGenerator?>>();
+            Dictionary<ConstructorInfo, ParameterInfo[]> parameters = new Dictionary<ConstructorInfo, ParameterInfo[]>();
+            foreach (ConstructorInfo c in constructors)
+            {
+                int unsatisfied;
+                Dictionary<ParameterInfo, IValueGenerator?> generParams;
+                parameters.Add(c, c.GetParameters());
+                (generParams, unsatisfied) = SetGenerators(parameters[c].ToList(), constraits);
+                constructorUnsatisfied.Add(c, unsatisfied);
+                constructorParameters.Add(c, generParams);
+            }
+            constructors.Sort(new MaxSatisfied(constructorUnsatisfied));
+            while (constructors.Count > 0 && newObj == null)
+            {
+                constructor = constructors.First();
+                object?[] objParameters = new object[constructorParameters[constructor].Count];
+                for(int i = 0; i < objParameters.Length; i++)
                 {
-                    newObj = Activator.CreateInstance(t);
+                    context.Generator = constructorParameters[constructor][parameters[constructor][i]];
+                    try
+                    {
+                        objParameters[i] = context.Faker.Create(parameters[constructor][i].ParameterType);
+                    }
+                    catch { }
                 }
-            };
-
-            if(newObj == null)
+                try
+                {
+                    newObj = Activator.CreateInstance(t, objParameters);
+                }
+                catch
+                {
+                    if (constructor != null)
+                    {
+                        constructors.Remove(constructor);
+                        constructorParameters.Remove(constructor);
+                    }
+                }
+            }
+            if (newObj == null)
             {
                 try
                 {
                     newObj = Activator.CreateInstance(t);
                 }
                 catch { }
-                finally { }
-            }
-
-            if(newObj != null)
-            {
-                foreach (FieldInfo field in fields.Keys)
-                {
-                    parameterType = field.FieldType;
-                    context.Generator = fields[field];
-                    field.SetValue(newObj, context.Faker.Create(parameterType));
-                }
-                foreach (PropertyInfo property in properties.Keys)
-                {
-                    parameterType = property.PropertyType;
-                    context.Generator = properties[property];
-                    property.SetValue(newObj, context.Faker.Create(parameterType));
-                }
             }
             return newObj;
         }
@@ -127,7 +156,8 @@ namespace FakerDll
         /// calls method FindGenerator which removes generators from _constraits
         /// </summary>
         /// <param name="t"></param>
-        private void SetGenerators(Type t, ref Dictionary<FieldInfo, IValueGenerator?> _fields, ref Dictionary<PropertyInfo, IValueGenerator?> _properties, ref Dictionary<MemberInfo, IValueGenerator>? _constraits)
+        private void SetGenerators(Type t, ref Dictionary<FieldInfo, IValueGenerator?> _fields, 
+            ref Dictionary<PropertyInfo, IValueGenerator?> _properties, ref Dictionary<MemberInfo, IValueGenerator>? _constraits)
         {
             FieldInfo[] fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance);
             PropertyInfo[] properties = t.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -136,7 +166,7 @@ namespace FakerDll
             foreach(FieldInfo field in fields)
             {
                 generator = FindGenerator(field, ref _constraits);
-                _fields.Add(field, null);
+                _fields.Add(field, generator);
             }
             foreach(PropertyInfo property in properties)
             {
@@ -172,7 +202,7 @@ namespace FakerDll
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        private (Dictionary<ParameterInfo, IValueGenerator?>, int unsatisfied) SetGenerators(List<ParameterInfo> parameters, ref Dictionary<MemberInfo, IValueGenerator>? _constraits)
+        private (Dictionary<ParameterInfo, IValueGenerator?>, int unsatisfied) SetGenerators(List<ParameterInfo> parameters, Dictionary<MemberInfo, IValueGenerator>? _constraits)
         {
             Dictionary<ParameterInfo, IValueGenerator?> parametersGenerators = new Dictionary<ParameterInfo, IValueGenerator?>();
             if (_constraits == null)
@@ -208,40 +238,6 @@ namespace FakerDll
             return (parametersGenerators, unsatisfied);
 
         }
-        private ConstructorInfo? SelectConstructor(List<ConstructorInfo> constructors, ref Dictionary<ParameterInfo, IValueGenerator?> _parameters, ref Dictionary<MemberInfo, IValueGenerator>? _constraits)
-        {
-            ConstructorInfo? constructor;
-            List<ParameterInfo> parameters; 
-            Dictionary<ParameterInfo, IValueGenerator?> constructorParamters;
-            int unsatisfied = 0;
-            if (constructors.Count < 0)
-            {
-                return null;
-            }
-            constructor = constructors[0];
-            (_parameters, unsatisfied) = SetGenerators(constructor.GetParameters().ToList(), ref _constraits);
-            if (_constraits != null)
-            {
-                _parameters.Clear();
-                constructor = null;
-                int miss = _constraits.Count;
-                for (int i = 0; i < constructors.Count && miss > 0; i++)
-                {
-                    unsatisfied = _constraits.Count;
-                    parameters = constructors[i].GetParameters().ToList();
-                    (constructorParamters, unsatisfied) = SetGenerators(parameters, ref _constraits);
-
-                    if (miss > unsatisfied)
-                    {
-                        miss = unsatisfied;
-                        constructor = constructors[i];
-
-                        _parameters = constructorParamters;
-                    }
-                }
-            }
-            return constructor;
-        }
         private bool SameProperty(MemberInfo member, ParameterInfo parameter)
         {
             bool sameType = false;
@@ -256,6 +252,13 @@ namespace FakerDll
                 sameType = field.FieldType == parameter.ParameterType;
             }
             return string.Compare(member.Name, parameter.Name, true) == 0 && sameType;
+        }
+        private static object? GetDefaultValue(Type t)
+        {
+            if (t.IsValueType)
+                return Activator.CreateInstance(t);
+            else
+                return null;
         }
     }
 }
