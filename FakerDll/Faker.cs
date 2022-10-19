@@ -2,7 +2,6 @@
 {
     public class Faker : IFaker
     {
-        // public IValueGenerator? PriorityGenerator { get; set; }
         private GeneratorContext generatorContext;
         private List<IValueGenerator> generators;
         private IValueGenerator generalGenerator;
@@ -75,6 +74,10 @@
             {
                 generators.Add(generator);
             }
+        }
+        public bool ContainsGenerator(IValueGenerator generator)
+        {
+            return generators.Contains(generator);
         }
     }
 }

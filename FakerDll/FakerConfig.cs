@@ -15,7 +15,7 @@ namespace FakerDll
         {
             generatorsConstraits = new Dictionary<Type, Dictionary<MemberInfo, IValueGenerator>>();
         }
-        public void Add<T, E, Generator>(Expression<Func<T, E>> lambda)
+        public void Add<T, E, Generator>(Expression<Func<T, E?>> lambda)
             where Generator : IValueGenerator, new()
         {
             Type type = lambda.Parameters[0].Type;

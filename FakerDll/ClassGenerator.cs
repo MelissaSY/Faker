@@ -25,42 +25,37 @@ namespace FakerDll
     }
     public class ClassGenerator : IValueGenerator
     {
-        private Dictionary<Type, int> Types { get; set; }
+        private RecursionController recursionController;
         public bool CanGenerate(Type t)
         {
             return true;
         }
         public ClassGenerator()
         {
-            Types = new Dictionary<Type, int>();
+            recursionController = new();
         }
         public object? Generate(Type t, GeneratorContext context)
         {
-            if (!Types.ContainsKey(t))
-            {
-                Types.Add(t, 0);
-            }
-            if (this.Types[t] > 3)
+            if (!recursionController.CanGenerate(t))
             {
                 return GetDefaultValue(t);
             }
-            Types[t]++;
             Dictionary<MemberInfo, IValueGenerator>? constraits = null;
-            Dictionary<PropertyInfo, IValueGenerator?> properties = new Dictionary<PropertyInfo, IValueGenerator?>();
-            Dictionary<FieldInfo, IValueGenerator?> fields = new Dictionary<FieldInfo, IValueGenerator?>();
+            Dictionary<PropertyInfo, IValueGenerator?> properties = new();
+            Dictionary<FieldInfo, IValueGenerator?> fields = new();
             context.Faker.Config?.generatorsConstraits.TryGetValue(t, out constraits);
             constraits = CopyConstraits(constraits);
             SetGenerators(t, ref fields, ref properties, ref constraits);
             object? newObj = TryActivate(t, context, constraits);
             InitializeFieldsProoperties(newObj, fields, properties, context);
-            this.Types[t]--;
+            recursionController.GenerationFinished(t);
             return newObj;
         }
         private Dictionary<MemberInfo, IValueGenerator>? CopyConstraits(Dictionary<MemberInfo, IValueGenerator>? constraits)
         {
             if (constraits == null)
                 return null;
-            Dictionary<MemberInfo, IValueGenerator>? newConstraits = new Dictionary<MemberInfo, IValueGenerator>();
+            Dictionary<MemberInfo, IValueGenerator>? newConstraits = new();
             foreach(MemberInfo member in constraits.Keys)
             {
                 newConstraits.Add(member, constraits[member]);
@@ -101,13 +96,12 @@ namespace FakerDll
             object? newObj = null;
             ConstructorInfo? constructor;
             List<ConstructorInfo> constructors = t.GetConstructors(BindingFlags.Public | BindingFlags.Instance).ToList();
-            Dictionary<ConstructorInfo, int> constructorUnsatisfied = new Dictionary<ConstructorInfo, int>();
-            Dictionary<ConstructorInfo, Dictionary<ParameterInfo, IValueGenerator?>> constructorParameters =
-                new Dictionary<ConstructorInfo, Dictionary<ParameterInfo, IValueGenerator?>>();
-            Dictionary<ConstructorInfo, ParameterInfo[]> parameters = new Dictionary<ConstructorInfo, ParameterInfo[]>();
+            Dictionary<ConstructorInfo, int> constructorUnsatisfied = new();
+            Dictionary<ConstructorInfo, Dictionary<ParameterInfo, IValueGenerator?>> constructorParameters = new();
+            Dictionary<ConstructorInfo, ParameterInfo[]> parameters = new();
+            int unsatisfied;
             foreach (ConstructorInfo c in constructors)
             {
-                int unsatisfied;
                 Dictionary<ParameterInfo, IValueGenerator?> generParams;
                 parameters.Add(c, c.GetParameters());
                 (generParams, unsatisfied) = SetGenerators(parameters[c].ToList(), constraits);

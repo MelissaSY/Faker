@@ -9,7 +9,7 @@ namespace FakerDll
 {
     public interface IFakerConfig
     {
-        void Add<T, E, Generator>(Expression<Func<T, E>> lambda)
+        void Add<T, E, Generator>(Expression<Func<T, E?>> lambda)
             where Generator : IValueGenerator, new();
     }
 }

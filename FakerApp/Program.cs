@@ -11,11 +11,11 @@ namespace FakerApp
             this.Name = Name;
             this.Age = 0;
         }
-        public person(int age)
+        public person(int age, string name)
         {
-            this.Age = age;
             this.Surname = "";
-            this.Name = "";
+            this.Age = age;
+            this.Name = name;
         }
         public person()
         {
@@ -25,7 +25,14 @@ namespace FakerApp
         }
         public string Name { get; }
         public int Age { get; }
-        public string Surname { get; private set; }
+        public string Surname { get; set; }
+        public override string ToString()
+        {
+            string personInfo = $"Name: {this.Name}\n";
+            personInfo += $"Surname: {this.Surname}\n";
+            personInfo += $"Age: {this.Age}\n";
+            return personInfo;
+        }
     }
     public class A
     {
@@ -61,6 +68,7 @@ namespace FakerApp
         public ulong ul;
         public ushort us;
         public long l;
+
         private A? _a;
         private char _c;
         public Foo(A a, List<List<person>> people, char c)
@@ -78,7 +86,7 @@ namespace FakerApp
             FakerConfig config = new FakerConfig();
             config.Add<person, int, AgeGenerator>(p => p.Age);
             config.Add<person, string, NameGenerator>(p => p.Name);
-            config.Add<person, string, StringGenerator>(p => p.Surname);
+            config.Add<person, string, SurnameGenerator>(p => p.Surname);
 
             config.Add<A, int, AgeGenerator>(a => a.Age);
 
@@ -93,7 +101,12 @@ namespace FakerApp
             double doub = faker.Create<double>();
             bool b = faker.Create<bool>();
             List<List<person>> people = faker.Create<List<List<person>>>();
-
+            List<person> people2 = faker.Create<List<person>>();
+            foreach(person person in people2)
+            {
+                Console.WriteLine(person);
+            }
+            Console.WriteLine(Person);
             Console.ReadLine();
         }
     }
