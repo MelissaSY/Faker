@@ -11,5 +11,6 @@ namespace FakerDll
     {
         void Add<T, E, Generator>(Expression<Func<T, E?>> lambda)
             where Generator : IValueGenerator, new();
+        void Remove<T, E>(Expression<Func<T, E?>> lambda);
     }
 }

@@ -32,7 +32,7 @@ namespace FakerDll
         }
         public ClassGenerator()
         {
-            recursionController = new();
+            recursionController = new RecursionController();
         }
         public object? Generate(Type t, GeneratorContext context)
         {
@@ -41,8 +41,8 @@ namespace FakerDll
                 return GetDefaultValue(t);
             }
             Dictionary<MemberInfo, IValueGenerator>? constraits = null;
-            Dictionary<PropertyInfo, IValueGenerator?> properties = new();
-            Dictionary<FieldInfo, IValueGenerator?> fields = new();
+            Dictionary<PropertyInfo, IValueGenerator?> properties = new Dictionary<PropertyInfo, IValueGenerator?>();
+            Dictionary<FieldInfo, IValueGenerator?> fields = new Dictionary<FieldInfo, IValueGenerator?>();
             context.Faker.Config?.generatorsConstraits.TryGetValue(t, out constraits);
             constraits = CopyConstraits(constraits);
             SetGenerators(t, ref fields, ref properties, ref constraits);
@@ -55,7 +55,7 @@ namespace FakerDll
         {
             if (constraits == null)
                 return null;
-            Dictionary<MemberInfo, IValueGenerator>? newConstraits = new();
+            Dictionary<MemberInfo, IValueGenerator>? newConstraits = new Dictionary<MemberInfo, IValueGenerator>();
             foreach(MemberInfo member in constraits.Keys)
             {
                 newConstraits.Add(member, constraits[member]);

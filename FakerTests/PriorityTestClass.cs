@@ -6,24 +6,24 @@ using System.Threading.Tasks;
 
 namespace FakerTests
 {
-    public class TestClass
+    public class PriorityTestClass
     {
         public string? TestString { get; }
         public string? TestString2 { get; }
         public string? TestString3 { get; set; }
         public string? TestString4 { get; set; }
-        public TestClass()
+        public PriorityTestClass()
         {     }
-        public TestClass(string? testString)
+        public PriorityTestClass(string? testString)
         {
             this.TestString = testString;
         }
-        public TestClass(string? testString, string? testString3, string? testString4) : this(testString)
+        public PriorityTestClass(string? testString, string? testString3, string? testString4) : this(testString)
         {
             TestString3 = testString3;
             TestString4 = testString4;
         }
-        public TestClass(string? testString, string? testString2) : this(testString)
+        public PriorityTestClass(string? testString, string? testString2) : this(testString)
         {
             TestString2 = testString2;
         }

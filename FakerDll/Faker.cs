@@ -6,12 +6,16 @@
         private List<IValueGenerator> generators;
         private IValueGenerator generalGenerator;
         private Random random;
-        public FakerConfig? Config { get; }
+        public FakerConfig Config { get; }
         public Faker()
         {
             random = new Random();
             generatorContext = new GeneratorContext(random, this);
-            
+            if(this.Config == null)
+            {
+                this.Config = new FakerConfig();
+            }
+
             GeneratorsLoader loader = new GeneratorsLoader();
             generators = new List<IValueGenerator>();
             generators.Add(new BoolGenerator());

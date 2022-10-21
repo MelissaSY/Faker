@@ -7,24 +7,45 @@ namespace FakerTests
         public void Setup()
         {
         }
-
+        public bool IsList(Type T)
+        {
+            bool isList = false;
+            if (T.IsGenericType)
+            {
+                Type E = T.GetGenericTypeDefinition();
+                isList = E == typeof(List<>);
+            }
+            return isList;
+        }
+        public void ListTest(IList ts)
+        {
+            int num = ts.Count;
+            for(int i = 0; i < num; i++)
+            {
+                Assert.IsNotNull(ts[i]);
+            }
+        }
         public void PrimitiveTest<T>(Faker faker)
+        {
+            PrimitiveTest(typeof(T), faker);
+        }
+        public void PrimitiveTest(Type t, Faker faker)
         {
             object? primitive = null;
             try
             {
-                primitive = faker.Create<T>();
+                primitive = faker.Create(t);
             }
             catch
             {
-                Assert.Fail($"Could not generate type {typeof(T)}");
+                Assert.Fail($"Could not generate type {t}");
             }
-            Assert.IsNotNull(primitive, $"Could not generate type {typeof(T)}");
+            Assert.IsNotNull(primitive, $"Could not generate type {t}");
         }
         [Test]
         public void PrimitivesTest()
         {
-            Faker faker = new();
+            Faker faker = new Faker();
             PrimitiveTest<bool>(faker);
             PrimitiveTest<byte>(faker);
             PrimitiveTest<double>(faker);
@@ -43,31 +64,20 @@ namespace FakerTests
         [Test]
         public void DateTimeTest()
         {
-            Faker faker = new();
-            DateTime? dt = faker.Create<DateTime>();
+            Faker faker = new Faker();
             PrimitiveTest<DateTime>(faker);
-           // Assert.IsNotNull(dt, $"Could not generate type {typeof(DateTime)}");
         }
         [Test]
         public void ListIntTest()
         {
-            Faker faker = new();
+            Faker faker = new Faker();
             List<int>? ints = faker.Create<List<int>>();
             PrimitiveTest<List<int>>(faker);
-          //  Assert.IsNotNull(ints, "Could not create List<int>");
-        }
-        [Test]
-        public void DictionaryIntIntTest()
-        {
-            Faker faker = new();
-            Dictionary<int, int>? intint = faker.Create<Dictionary<int, int>>();
-            PrimitiveTest<Dictionary<int, int>>(faker);
-           // Assert.IsNotNull(intint, "Could not create Dictionary<int, int>");
         }
         [Test]
         public void AddGeneratorTest()
         {
-            Faker faker = new();
+            Faker faker = new Faker();
             TestGenerator generator = new TestGenerator();
             faker.AddGenerator(generator);
             Assert.IsTrue(faker.ContainsGenerator(generator), "Could not add generator to generators list");
@@ -75,36 +85,36 @@ namespace FakerTests
         [Test]
         public void ConfigTest()
         {
-            FakerConfig config = new();
-            config.Add<TestClass, string, TestGenerator>(test => test.TestString);
-            Faker faker = new(config);
-            TestClass? testClass = faker.Create<TestClass>();
+            FakerConfig config = new FakerConfig();
+            config.Add<PriorityTestClass, string, TestGenerator>(test => test.TestString3);
+            Faker faker = new Faker(config);
+            PriorityTestClass? testClass = faker.Create<PriorityTestClass>();
             Assert.That(testClass, Is.Not.Null);
-            Assert.IsTrue(TestGenerator._strings.Contains(testClass.TestString), "Could not use TestGenerator");
+            Assert.IsTrue(TestGenerator._strings.Contains(testClass.TestString3), "Could not use TestGenerator");
         }
         [Test]
         public void NoConfigPriorityTest()
         {
-            Faker faker = new();
-            TestClass? testClass = faker.Create<TestClass>();
-            Assert.IsNotNull(testClass, "Could not create TestClass");
+            Faker faker = new Faker();
+            PriorityTestClass? testClass = faker.Create<PriorityTestClass>();
+            Assert.IsNotNull(testClass, "Could not create PriorityTestClass");
             Assert.IsNull(testClass.TestString2, "Used wrong constructor");
-            Assert.IsNotNull(testClass.TestString, "Could not initilize TestClass.TestString");
-            Assert.IsNotNull(testClass.TestString3, "Could not initilize TestClass.TestString3");
-            Assert.IsNotNull(testClass.TestString4, "Could not initilize TestClass.TestString4");
+            Assert.IsNotNull(testClass.TestString, "Could not initilize PriorityTestClass.TestString");
+            Assert.IsNotNull(testClass.TestString3, "Could not initilize PriorityTestClass.TestString3");
+            Assert.IsNotNull(testClass.TestString4, "Could not initilize PriorityTestClass.TestString4");
         }
         [Test]
         public void ConfigPriorityTest()
         {
-            FakerConfig config = new();
-            config.Add<TestClass, string, TestGenerator>(test => test.TestString);
-            config.Add<TestClass, string, TestGenerator>(test => test.TestString2);
-            config.Add<TestClass, string, TestGenerator>(test => test.TestString3);
-            config.Add<TestClass, string, TestGenerator>(test => test.TestString4);
+            FakerConfig config = new FakerConfig();
+            config.Add<PriorityTestClass, string, TestGenerator>(test => test.TestString);
+            config.Add<PriorityTestClass, string, TestGenerator>(test => test.TestString2);
+            config.Add<PriorityTestClass, string, TestGenerator>(test => test.TestString3);
+            config.Add<PriorityTestClass, string, TestGenerator>(test => test.TestString4);
 
-            Faker faker = new(config);
-            TestClass? testClass = faker.Create<TestClass>();
-            Assert.IsNotNull(testClass, "Could not create TestClass");
+            Faker faker = new Faker(config);
+            PriorityTestClass? testClass = faker.Create<PriorityTestClass>();
+            Assert.IsNotNull(testClass, "Could not create PriorityTestClass");
             Assert.IsNotNull(testClass.TestString2, "Used wrong constructor");
 
             Assert.IsTrue(TestGenerator._strings.Contains(testClass.TestString), "Could not use TestGenerator");
@@ -116,7 +126,7 @@ namespace FakerTests
         [Test]
         public void CyclicalClassesTest()
         {
-            Faker faker = new();
+            Faker faker = new Faker();
             A? a = faker.Create<A>();
             Assert.IsNotNull(a);
             Assert.IsNotNull(a.b);
@@ -132,6 +142,82 @@ namespace FakerTests
             Assert.IsNotNull(a.b.c.a.b.c.a.b.c.a.b.c);
             Assert.IsNull(a.b.c.a.b.c.a.b.c.a.b.c.a);
         }
-        
+        [Test]
+        public void PriviteConstructorTest()
+        {
+            Faker faker = new Faker();
+            try
+            {
+                NoConstructorClasses? privateConstructorClass = faker.Create<NoConstructorClasses>();
+            }
+            catch
+            {
+                Assert.Fail("Could not create PrivateConstructorClass");
+            }
+        }
+        [Test]
+        public void ExceptionCostructorClassTest()
+        {
+            Faker faker = new Faker();
+            try
+            {
+                ExceptionconstructorClass? exceptionconstructorClass = faker.Create<ExceptionconstructorClass>();
+            }
+            catch
+            {
+                Assert.Fail("Could not create ExceptionconstructorClasss");
+            }
+        }
+        [Test]
+        public void CyclicalListTest()
+        {
+            Faker faker = new Faker();
+            CyclicalListClass? cyclicalListClass = faker.Create<CyclicalListClass>();
+            Assert.IsNotNull(cyclicalListClass);
+            Assert.IsNotNull(cyclicalListClass.cyclicals);
+            ListTest(cyclicalListClass.cyclicals);
+            foreach(CyclicalListClass c in cyclicalListClass.cyclicals)
+            {
+                Assert.IsNotNull(c.cyclicals, "List is not initiated");
+                ListTest(c.cyclicals);
+                foreach (CyclicalListClass c1 in c.cyclicals)
+                {
+                    Assert.IsNotNull(c1.cyclicals, "List is not initiated");
+                    ListTest(c1.cyclicals);
+                    foreach(CyclicalListClass c2 in c1.cyclicals)
+                    {
+                        Assert.IsNotNull(c2.cyclicals, "List is not initiated");
+                        Assert.That(c2.cyclicals.Count, Is.EqualTo(0), "Cyclical list contains items but shouldn't on that level");
+                    }
+                } 
+            }
+        }
+        [Test]
+        public void RemoveConfigTest()
+        {
+            FakerConfig config = new FakerConfig();
+            config.Add<PriorityTestClass, string, TestGenerator>(test => test.TestString);
+            config.Add<PriorityTestClass, string, TestGenerator>(test => test.TestString2);
+            Faker faker = new Faker(config);
+            try
+            {
+                faker.Config.Remove<PriorityTestClass, string>(test => test.TestString);
+                Assert.IsTrue(faker.Config.generatorsConstraits.ContainsKey(typeof(PriorityTestClass)), "At least one constrait should have remained");
+                Assert.IsNotNull(faker.Config.generatorsConstraits[typeof(PriorityTestClass)], "Wrong implementation of removing operation");
+                faker.Config.Remove<PriorityTestClass>();
+                Assert.IsFalse(faker.Config.generatorsConstraits.ContainsKey(typeof(PriorityTestClass)), "There should be no remaining constraits for the type");
+            }
+            catch
+            {
+                Assert.Fail("Wrong implementation of removing operation (Exception occured)");
+            }
+        }
+        [Test]
+        public void GeneratorLoaderTest()
+        {
+            Faker faker = new Faker();
+            PrimitiveTest<char>(faker);
+            PrimitiveTest<decimal>(faker);
+        }
     }
 }
