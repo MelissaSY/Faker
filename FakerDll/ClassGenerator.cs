@@ -36,7 +36,7 @@ namespace FakerDll
         }
         public object? Generate(Type t, GeneratorContext context)
         {
-            if (!recursionController.CanGenerate(t))
+            if (!recursionController.CanGenerate(t, context.Faker.RecursionDepth))
             {
                 return GetDefaultValue(t);
             }

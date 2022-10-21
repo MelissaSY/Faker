@@ -143,6 +143,30 @@ namespace FakerTests
             Assert.IsNull(a.b.c.a.b.c.a.b.c.a.b.c.a);
         }
         [Test]
+        public void RecursiondepthSetTest()
+        {
+            Faker faker = new Faker();
+            faker.RecursionDepth = 0;
+            A? a = faker.Create<A>();
+            Assert.IsNotNull(a);
+            Assert.IsNotNull(a.b);
+            Assert.IsNotNull(a.b.c);
+            Assert.IsNull(a.b.c.a);
+            faker.RecursionDepth = 9;
+            D? d = faker.Create<D>();
+            Assert.IsNotNull(d);
+            Assert.IsNotNull(d.d);
+            Assert.IsNotNull(d.d.d);
+            Assert.IsNotNull(d.d.d.d);
+            Assert.IsNotNull(d.d.d.d.d);
+            Assert.IsNotNull(d.d.d.d.d.d);
+            Assert.IsNotNull(d.d.d.d.d.d.d);
+            Assert.IsNotNull(d.d.d.d.d.d.d.d);
+            Assert.IsNotNull(d.d.d.d.d.d.d.d.d);
+            Assert.IsNotNull(d.d.d.d.d.d.d.d.d.d);
+            Assert.IsNull(d.d.d.d.d.d.d.d.d.d.d);
+        }
+        [Test]
         public void PriviteConstructorTest()
         {
             Faker faker = new Faker();

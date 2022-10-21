@@ -6,10 +6,26 @@
         private List<IValueGenerator> generators;
         private IValueGenerator generalGenerator;
         private Random random;
+        private byte _recursionDepth;
+        public byte RecursionDepth
+        {
+            get
+            {
+                return _recursionDepth;
+            }
+            set
+            {
+                if (value < RecursionController.MaxDepth && value >= RecursionController.MinDepth)
+                {
+                    _recursionDepth = value;
+                }
+            }
+        }
         public FakerConfig Config { get; }
         public Faker()
         {
             random = new Random();
+            _recursionDepth = 3;
             generatorContext = new GeneratorContext(random, this);
             if(this.Config == null)
             {

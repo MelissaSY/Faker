@@ -18,4 +18,13 @@ namespace FakerTests
     {
         public A? a;
     }
+    public class D
+    {
+        public D? d;
+    }
+    public class CyclicalListClass
+    {
+        public List<CyclicalListClass>? cyclicals;
+    }
 }
+
