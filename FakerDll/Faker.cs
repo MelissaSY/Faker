@@ -6,8 +6,8 @@
         private List<IValueGenerator> generators;
         private IValueGenerator generalGenerator;
         private Random random;
-        private byte _recursionDepth;
-        public byte RecursionDepth
+        private int _recursionDepth;
+        public int RecursionDepth
         {
             get
             {
@@ -15,7 +15,7 @@
             }
             set
             {
-                if (value < RecursionController.MaxDepth && value >= RecursionController.MinDepth)
+                if (value <= RecursionController.MaxDepth && value >= RecursionController.MinDepth)
                 {
                     _recursionDepth = value;
                 }

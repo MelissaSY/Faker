@@ -128,19 +128,14 @@ namespace FakerTests
         {
             Faker faker = new Faker();
             A? a = faker.Create<A>();
-            Assert.IsNotNull(a);
-            Assert.IsNotNull(a.b);
-            Assert.IsNotNull(a.b.c);
-            Assert.IsNotNull(a.b.c.a);
-            Assert.IsNotNull(a.b.c.a.b);
-            Assert.IsNotNull(a.b.c.a.b.c);
-            Assert.IsNotNull(a.b.c.a.b.c.a);
-            Assert.IsNotNull(a.b.c.a.b.c.a.b);
-            Assert.IsNotNull(a.b.c.a.b.c.a.b.c);
-            Assert.IsNotNull(a.b.c.a.b.c.a.b.c.a);
-            Assert.IsNotNull(a.b.c.a.b.c.a.b.c.a.b);
-            Assert.IsNotNull(a.b.c.a.b.c.a.b.c.a.b.c);
-            Assert.IsNull(a.b.c.a.b.c.a.b.c.a.b.c.a);
+            for(int i = 0; i <= faker.RecursionDepth; i++)
+            {
+                Assert.IsNotNull(a, $"a is null on {i} iteration");
+                Assert.IsNotNull(a.b,$"b is null on {i} iteration");
+                Assert.IsNotNull(a.b.c, $"c is null on {i} iteration");
+                a = a.b.c.a;
+            }
+            Assert.IsNull(a, $"a should be null");
         }
         [Test]
         public void RecursiondepthSetTest()
@@ -152,19 +147,14 @@ namespace FakerTests
             Assert.IsNotNull(a.b);
             Assert.IsNotNull(a.b.c);
             Assert.IsNull(a.b.c.a);
-            faker.RecursionDepth = 9;
+            faker.RecursionDepth = RecursionController.MaxDepth;
             D? d = faker.Create<D>();
-            Assert.IsNotNull(d);
-            Assert.IsNotNull(d.d);
-            Assert.IsNotNull(d.d.d);
-            Assert.IsNotNull(d.d.d.d);
-            Assert.IsNotNull(d.d.d.d.d);
-            Assert.IsNotNull(d.d.d.d.d.d);
-            Assert.IsNotNull(d.d.d.d.d.d.d);
-            Assert.IsNotNull(d.d.d.d.d.d.d.d);
-            Assert.IsNotNull(d.d.d.d.d.d.d.d.d);
-            Assert.IsNotNull(d.d.d.d.d.d.d.d.d.d);
-            Assert.IsNull(d.d.d.d.d.d.d.d.d.d.d);
+            for(int i = 0; i <= RecursionController.MaxDepth; i++)
+            {
+                Assert.IsNotNull(d, $"d is null on {i} iteration");
+                d = d.d;
+            }
+            Assert.IsNull(d, $"d should be null");
         }
         [Test]
         public void PriviteConstructorTest()
