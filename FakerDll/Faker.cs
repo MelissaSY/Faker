@@ -2,10 +2,10 @@
 {
     public class Faker : IFaker
     {
-        private GeneratorContext generatorContext;
-        private List<IValueGenerator> generators;
-        private IValueGenerator generalGenerator;
-        private Random random;
+        private GeneratorContext _generatorContext;
+        private List<IValueGenerator> _generators;
+        private IValueGenerator _generalGenerator;
+        private Random _random;
         private int _recursionDepth;
         public int RecursionDepth
         {
@@ -24,32 +24,30 @@
         public FakerConfig Config { get; }
         public Faker()
         {
-            random = new Random();
+            _random = new Random();
             _recursionDepth = 3;
-            generatorContext = new GeneratorContext(random, this);
+            _generatorContext = new GeneratorContext(_random, this);
             if(this.Config == null)
             {
                 this.Config = new FakerConfig();
             }
 
-            GeneratorsLoader loader = new GeneratorsLoader();
-            generators = new List<IValueGenerator>();
-            generators.Add(new BoolGenerator());
-            generators.Add(new ByteGenerator());
-            generators.Add(new SByteGenerator());
-            generators.Add(new ShortGenerator());
-            generators.Add(new UShortGenerator());
-            generators.Add(new IntGenerator());
-            generators.Add(new UIntGenerator());
-            generators.Add(new StringGenerator());
-            generators.Add(new DateTimeGenerator());
-            generators.Add(new FloatGenerator());
-            generators.Add(new DoubleGenerator());
-            generators.Add(new LongGenerator());
-            generators.Add(new ULongGenerator());
-            generators.Add(new ListGenerator());
-            generators.AddRange(loader.LoadGenerators());
-            generalGenerator = new ClassGenerator();
+            _generators = new List<IValueGenerator>();
+            _generators.Add(new BoolGenerator());
+            _generators.Add(new ByteGenerator());
+            _generators.Add(new SByteGenerator());
+            _generators.Add(new ShortGenerator());
+            _generators.Add(new UShortGenerator());
+            _generators.Add(new IntGenerator());
+            _generators.Add(new UIntGenerator());
+            _generators.Add(new StringGenerator());
+            _generators.Add(new DateTimeGenerator());
+            _generators.Add(new FloatGenerator());
+            _generators.Add(new DoubleGenerator());
+            _generators.Add(new LongGenerator());
+            _generators.Add(new ULongGenerator());
+            _generators.Add(new ListGenerator());
+            _generalGenerator = new ClassGenerator();
         }
 
         public Faker(FakerConfig config):this()
@@ -62,42 +60,49 @@
         }
         public object? Create(Type T)
         {
-            return FindGenerator(T).Generate(T, generatorContext);
+            return FindGenerator(T).Generate(T, _generatorContext);
         }
         private IValueGenerator FindGenerator(Type T)
         {
             IValueGenerator generator;
-            if(generatorContext.Generator != null)
+            if(_generatorContext.Generator != null)
             {
-                generator = generatorContext.Generator;
-                generatorContext.Generator = null;
+                generator = _generatorContext.Generator;
+                _generatorContext.Generator = null;
             }
             else
             {
                 int i = 0;
-                for (; i < generators.Count && !generators[i].CanGenerate(T); i++) { }
+                for (; i < _generators.Count && !_generators[i].CanGenerate(T); i++) { }
 
-                if (i < generators.Count)
+                if (i < _generators.Count)
                 {
-                    generator = generators[i];
+                    generator = _generators[i];
                 }
                 else
                 {
-                    generator = generalGenerator;
+                    generator = _generalGenerator;
                 }
             }
             return generator;
         }
         public void AddGenerator(IValueGenerator generator)
         {
-            if (!generators.Contains(generator))
+            if (!_generators.Contains(generator))
             {
-                generators.Add(generator);
+                _generators.Add(generator);
+            }
+        }
+        public void RemoveGenerator(IValueGenerator generator)
+        {
+            if (_generators.Contains(generator))
+            {
+                _generators.Remove(generator);
             }
         }
         public bool ContainsGenerator(IValueGenerator generator)
         {
-            return generators.Contains(generator);
+            return _generators.Contains(generator);
         }
     }
 }

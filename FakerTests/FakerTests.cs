@@ -230,6 +230,12 @@ namespace FakerTests
         public void GeneratorLoaderTest()
         {
             Faker faker = new Faker();
+            GeneratorsLoader loader = new GeneratorsLoader();
+            List<IValueGenerator> generators = loader.LoadGenerators();
+            foreach (IValueGenerator generator in generators)
+            {
+                faker.AddGenerator(generator);
+            }
             PrimitiveTest<char>(faker);
             PrimitiveTest<decimal>(faker);
         }

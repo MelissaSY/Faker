@@ -91,6 +91,14 @@ namespace FakerApp
             config.Add<A, int, AgeGenerator>(a => a.Age);
 
             Faker faker = new Faker(config);
+
+            GeneratorsLoader loader = new GeneratorsLoader();
+            List<IValueGenerator> generators = loader.LoadGenerators();
+            foreach(IValueGenerator generator in generators)
+            {
+                faker.AddGenerator(generator);
+            }
+
             person Person = faker.Create<person>();
             Foo foo = faker.Create<Foo>();
             char c = faker.Create<char>();
