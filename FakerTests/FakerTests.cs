@@ -239,5 +239,18 @@ namespace FakerTests
             PrimitiveTest<char>(faker);
             PrimitiveTest<decimal>(faker);
         }
+        [Test]
+        public void InterfaceCreateTest()
+        {
+            Faker faker = new Faker();
+            try
+            {
+                IFaker? iFaker = faker.Create<IFaker>();
+            } 
+            catch
+            {
+                Assert.Fail("Could not handle interface variable");
+            }
+        }
     }
 }

@@ -100,12 +100,12 @@ namespace FakerApp
             }
 
             person Person = faker.Create<person>();
+            DateTime dt = faker.Create<DateTime>();
             Foo foo = faker.Create<Foo>();
             char c = faker.Create<char>();
-            DateTime dt =   faker.Create<DateTime>();
+            decimal? dec = faker.Create<decimal>();
             Faker? fc = faker.Create<Faker>();
             
-            decimal? dec = faker.Create<decimal>();
             double doub = faker.Create<double>();
             bool b = faker.Create<bool>();
             List<List<person>> people = faker.Create<List<List<person>>>();
