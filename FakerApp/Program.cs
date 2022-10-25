@@ -108,13 +108,18 @@ namespace FakerApp
             
             double doub = faker.Create<double>();
             bool b = faker.Create<bool>();
-            List<List<person>> people = faker.Create<List<List<person>>>();
+         //   List<List<person>> people = faker.Create<List<List<person>>>();
             List<person> people2 = faker.Create<List<person>>();
             foreach(person person in people2)
             {
                 Console.WriteLine(person);
             }
             Console.WriteLine(Person);
+            Console.WriteLine(dt);
+            Console.WriteLine(c);
+            Console.WriteLine(dec);
+            Console.WriteLine(doub);
+            Console.WriteLine(dec);
             Console.ReadLine();
         }
     }
